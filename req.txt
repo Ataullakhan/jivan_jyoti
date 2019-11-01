@@ -1,0 +1,10 @@
+Django==2.2.6
+numpy==1.17.3
+pandas==0.25.2
+postgres==3.0.0
+psycopg2-binary==2.8.4
+psycopg2-pool==1.1
+python-dateutil==2.8.0
+pytz==2019.3
+six==1.12.0
+sqlparse==0.3.0
