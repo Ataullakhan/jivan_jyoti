@@ -79,8 +79,8 @@ DATABASES = {
         'NAME': 'jivan_jyoti_db',
         'USER': 'jiven_jyoti_user',
         'PASSWORD': 'jiven_jyoti_user',
-        'HOST': '106.201.102.97/32',
-        'PORT': '5432',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
