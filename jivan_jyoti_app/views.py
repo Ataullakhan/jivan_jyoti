@@ -50,6 +50,8 @@ def registration_form(request):
     """
     # try:
     if request.method == 'POST':
+        submit_date = '2019-10-26'
+        modified_date ='2019-10-26'
         print("1111111111")
         data = request.POST
         print('data', data)
@@ -72,7 +74,7 @@ def registration_form(request):
             print('555555555')
             return HttpResponse(json.dumps({"Message": 'mobile number is not correct', 'status': False}))
         params = {
-            'submit_date': new_dict['submit_date'][0], 'modify_date': new_dict['modify_date'][0],
+            'submit_date': submit_date, 'modify_date': modified_date,
             'family_unique_id': new_dict['family_unique_id'][0],
             'name': new_dict['name'][0], 'father_husband_name': new_dict['father_husband_name'][0],
             'mother_name': new_dict['mother_name'][0], 'gender': new_dict['gender'][0],
