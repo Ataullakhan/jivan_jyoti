@@ -2,8 +2,11 @@ from django.http import HttpResponse
 # from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
+from datetime import date
 import pandas as pd
 import json
+import requests
+import ast
 
 from jivan_jyoti import config
 from jivan_jyoti_app.utils import validate_pin, mobile_valid
@@ -50,9 +53,9 @@ def registration_form(request):
     """
     # try:
     if request.method == 'POST':
-        submit_date = '2019-10-26'
-        modified_date ='2019-10-26'
-        print("1111111111")
+        today = date.today()
+        submit_date = today.strftime("%Y/%m/%d")
+        modified_date =today.strftime("%Y/%m/%d")
         data = request.POST
         print('data', data)
         new_dict = dict(data)
@@ -118,19 +121,41 @@ def admin_registration(request):
     :param request:
     :return:
     """
-    try:
-        if request.method == 'POST':
-            data = request.POST
-            new_dict = dict(data)
-            print(new_dict['mobile'][0])
-            valid_mobile = config.mobile
-            print(valid_mobile)
-            if new_dict['mobile'][0] == valid_mobile:
-                return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': new_dict['mobile'][0]}))
-            else:
-                return HttpResponse(json.dumps({'msg': 'incorrect mobile number', 'status': False}))
-    except Exception as e:
-        return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
+    # try:
+    if request.method == 'POST':
+
+        otp = request.POST.get('otp')
+        mobile = request.POST.get('mobile')
+        valid_mobile = config.mobile
+        print(valid_mobile)
+        if mobile == valid_mobile:
+            print(mobile)
+            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+918697903433/AUTOGEN"
+            response = requests.request("POST", send_otp_url)
+            request.session['responce_text'] = response.text
+            print(response.text)
+            return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
+
+        elif otp != '' and otp != None:
+            print("otp", otp)
+            print('111111111', request.session['responce_text'])
+            res = request.session['responce_text']
+            res = ast.literal_eval(res)
+            session_id = res['Details']
+            print(session_id)
+            recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
+            print('recive_otp_url', recive_otp_url)
+            response = requests.request("POST", recive_otp_url)
+            print(response.text)
+            return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
+
+        else:
+            return HttpResponse(json.dumps({'msg': 'incorrect mobile number', 'status': False}))
+
+
+    # except Exception as e:
+    #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
+
 
 
 def volunteer_registration(request):
@@ -142,6 +167,15 @@ def volunteer_registration(request):
     try:
         if request.method == 'POST':
             data = request.POST
+            new_dict = dict(data)
+
+            params = {
+                'image': new_dict['image'][0],
+                'gender': new_dict['gender'][0],
+                'mobile': new_dict['mobile'][0],
+                'address': new_dict['address'][0]
+            }
+
 
     except Exception as e:
         return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
