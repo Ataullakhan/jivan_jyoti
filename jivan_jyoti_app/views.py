@@ -112,7 +112,7 @@ def registration_form(request):
         cursor = connection.cursor()
         cursor.execute(insert_query)
         print("555555555")
-        
+
         return HttpResponse(json.dumps({'Message': 'Success', 'status': True, 'data': 'Saved into database'}))
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
