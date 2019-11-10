@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration_form/', views.registration_form, name='registration_form'),
     path('admin_registration/', views.admin_registration, name='admin_registration'),
+    path('volunteer_registration/', views.volunteer_registration, name='volunteer_registration'),
 
 ]
 

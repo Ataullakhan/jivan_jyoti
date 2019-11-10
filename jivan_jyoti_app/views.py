@@ -1,3 +1,4 @@
+from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 # from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -8,8 +9,10 @@ import json
 import requests
 import ast
 
-from jivan_jyoti import config
+from jivan_jyoti import config, settings
 from jivan_jyoti_app.utils import validate_pin, mobile_valid
+
+path = settings.MEDIA_ROOT
 
 
 def getlowerdf(df):
@@ -109,6 +112,7 @@ def registration_form(request):
         cursor = connection.cursor()
         cursor.execute(insert_query)
         print("555555555")
+        
         return HttpResponse(json.dumps({'Message': 'Success', 'status': True, 'data': 'Saved into database'}))
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
@@ -127,26 +131,18 @@ def admin_registration(request):
         otp = request.POST.get('otp')
         mobile = request.POST.get('mobile')
         valid_mobile = config.mobile
-        print(valid_mobile)
         if mobile == valid_mobile:
-            print(mobile)
-            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+918697903433/AUTOGEN"
+            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91"+valid_mobile+"/AUTOGEN"
             response = requests.request("POST", send_otp_url)
             request.session['responce_text'] = response.text
-            print(response.text)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' and otp != None:
-            print("otp", otp)
-            print('111111111', request.session['responce_text'])
             res = request.session['responce_text']
             res = ast.literal_eval(res)
             session_id = res['Details']
-            print(session_id)
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
-            print('recive_otp_url', recive_otp_url)
             response = requests.request("POST", recive_otp_url)
-            print(response.text)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         else:
@@ -156,27 +152,70 @@ def admin_registration(request):
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
 
-
-
+@csrf_exempt
 def volunteer_registration(request):
     """
 
     :param request:
     :return:
     """
-    try:
-        if request.method == 'POST':
-            data = request.POST
-            new_dict = dict(data)
+    # try:
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        print('otppp', otp)
+        if otp == '' or otp == None:
+            image = request.FILES['image']
+            # if request.session['image'] != None:
+            fs = FileSystemStorage()
+            filename = fs.save(image.name, image)
+            image_url = path + '/' + filename
+            print('image_url', image_url)
+            request.session['image_url'] = image_url
+            request.session['gender'] = request.POST.get('gender')
+            request.session['mobile'] = request.POST.get('mobile')
+            request.session['address'] = request.POST.get('address')
 
-            params = {
-                'image': new_dict['image'][0],
-                'gender': new_dict['gender'][0],
-                'mobile': new_dict['mobile'][0],
-                'address': new_dict['address'][0]
-            }
+            admin_number = config.mobile
+            print(request.session['mobile'])
+        # if mobile_valid(request.session['mobile']):
+            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91" + admin_number + "/AUTOGEN"
+            response = requests.request("POST", send_otp_url)
+            request.session['responce_text'] = response.text
+            print('response texttt', response.text)
+            return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
+
+        elif otp != '' or otp != None:
+            res = request.session['responce_text']
+            res = ast.literal_eval(res)
+            session_id = res['Details']
+            recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" + otp
+            response = requests.request("POST", recive_otp_url)
+            request.session['responce_text1'] = response.text
+            otp_val = request.session['responce_text1']
+            res1 = ast.literal_eval(otp_val)
+            status = res1['Details']
+            print(status)
+
+            if status == 'OTP Matched':
+                params = {
+                    'image': request.session['image_url'],
+                    'gender': request.session['gender'],
+                    'mobile': request.session['mobile'],
+                    'address': request.session['address']
+                }
+                print(params)
+                insert_query = "insert into volunteer_registration(image_url, gender, mobile, address)" \
+                               + " VALUES('{image}', '{gender}', '{mobile}', '{address}')".format(**params)
+
+                print('insert_query', insert_query)
+                cursor = connection.cursor()
+                cursor.execute(insert_query)
+
+            return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
 
-    except Exception as e:
-        return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
+
+
+    # except Exception as e:
+    #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
 

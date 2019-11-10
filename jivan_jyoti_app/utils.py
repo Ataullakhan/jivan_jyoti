@@ -11,4 +11,5 @@ def validate_pin(pin):
 
 def mobile_valid(s):
     pattern = re.compile("^([7-9][0-9]{9})$")
-    return pattern.match(s)
+    if s != None:
+        return pattern.match(s)
