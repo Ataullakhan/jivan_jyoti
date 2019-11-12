@@ -14,7 +14,6 @@ from jivan_jyoti_app.utils import validate_pin, mobile_valid
 
 path = settings.MEDIA_ROOT
 
-
 def getlowerdf(df):
     """
     function for fetch and manage columns
@@ -127,22 +126,29 @@ def admin_registration(request):
     """
     # try:
     if request.method == 'POST':
-
         otp = request.POST.get('otp')
+        print(otp)
         mobile = request.POST.get('mobile')
+        print(mobile)
         valid_mobile = config.mobile
         if mobile == valid_mobile:
             send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91"+valid_mobile+"/AUTOGEN"
             response = requests.request("POST", send_otp_url)
+            print('------------', response)
             request.session['responce_text'] = response.text
+            print(request.session['responce_text'])
+            request.session.modified = True
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' and otp != None:
+            print('2222222', request.session['responce_text'])
             res = request.session['responce_text']
+            print('----', res)
             res = ast.literal_eval(res)
             session_id = res['Details']
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
             response = requests.request("POST", recive_otp_url)
+            request.session.modified = True
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         else:
