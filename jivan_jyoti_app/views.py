@@ -136,19 +136,36 @@ def admin_registration(request):
             send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91"+valid_mobile+"/AUTOGEN"
             response = requests.request("POST", send_otp_url)
             print('------------', response.text)
-            request.session['response_text'] = response.text
+            res = ast.literal_eval(response.text)
+            session_id = res['Details']
+            params = {
+                'session_id': session_id
+            }
+
+            insert_query = "insert into session_id_table(session_id) VALUES('{session_id}')".format(**params)
+            cursor = connection.cursor()
+            cursor.execute(insert_query)
+            # request.session['response_text'] = response.text
             print(request.session['response_text'])
+
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' and otp != None:
             print("in admin otp section")
-            print('2222222', request.session['response_text'])
-            res = request.session['response_text']
-            print('----', res)
-            res = ast.literal_eval(res)
-            session_id = res['Details']
+            # print('2222222', request.session['response_text'])
+            # res = request.session['response_text']
+            # print('----', res)
+            # res = ast.literal_eval(res)
+            # session_id = res['Details']
+            query = "select session_id from session_id_table;"
+            df = getdata(query)
+            session_id = df['session_id'][0]
+            print(session_id)
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
             response = requests.request("POST", recive_otp_url)
+            truncate_query = "truncate session_id_table;"
+            cursor = connection.cursor()
+            cursor.execute(truncate_query)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         else:
