@@ -146,7 +146,7 @@ def admin_registration(request):
             cursor = connection.cursor()
             cursor.execute(insert_query)
             # request.session['response_text'] = response.text
-            print(request.session['response_text'])
+            # print(request.session['response_text'])
 
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
