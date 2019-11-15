@@ -283,7 +283,7 @@ def fatch_ragistration_data(request):
         df['modify_date'] = df['modify_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
         df['dob'] = df['dob'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
-        data = df.to_json(orient='records')
+        data = df.to_dict('records')
         print('df', df)
         print('data', data)
 
@@ -302,7 +302,7 @@ def fatch_volunteer_data(request):
         get_data_query = "select name, image_url, gender, mobile, address from volunteer_registration;"
         df = getdata(get_data_query)
 
-        data = df.to_json(orient='records')
+        data = df.to_dict('records')
         print('df', df)
         print('data', data)
 
