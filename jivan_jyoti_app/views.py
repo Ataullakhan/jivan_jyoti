@@ -1,3 +1,5 @@
+from uuid import uuid1
+
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 # from django.shortcuts import render
@@ -152,11 +154,7 @@ def admin_registration(request):
 
         elif otp != '' and otp != None:
             print("in admin otp section")
-            # print('2222222', request.session['response_text'])
-            # res = request.session['response_text']
-            # print('----', res)
-            # res = ast.literal_eval(res)
-            # session_id = res['Details']
+
             query = "select session_id from session_id_table;"
             df = getdata(query)
             session_id = df['session_id'][0]
@@ -194,25 +192,53 @@ def volunteer_registration(request):
             filename = fs.save(image.name, image)
             image_url = path + '/' + filename
             print('image_url', image_url)
-            request.session['image_url'] = image_url
-            request.session['gender'] = request.POST.get('gender')
-            request.session['mobile'] = request.POST.get('mobile')
-            request.session['address'] = request.POST.get('address')
+
+            uuid = uuid1()
+            print('uuid', uuid)
+            params = {
+                'image': image_url,
+                'gender': request.POST.get('gender'),
+                'mobile': request.POST.get('mobile'),
+                'address': request.POST.get('address'),
+                'status': 'Panding',
+                'id': uuid
+            }
+            print(params)
+            insert_query = "insert into volunteer_registration(image_url, gender, mobile, address, status, id)" \
+                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}')".format(**params)
+
+            print('insert_query', insert_query)
+            cursor = connection.cursor()
+            cursor.execute(insert_query)
 
             admin_number = config.mobile
-            print(request.session['mobile'])
         # if mobile_valid(request.session['mobile']):
             send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91" + admin_number + "/AUTOGEN"
             response = requests.request("POST", send_otp_url)
             request.session['response_text'] = response.text
             print('response texttt', response.text)
+
+            res = ast.literal_eval(response.text)
+            session_id = res['Details']
+            params = {
+                'session_id': session_id,
+                'id': uuid
+            }
+
+            insert_query = "insert into session_id_table(session_id, id) VALUES('{session_id}', '{id}')".format(**params)
+            cursor = connection.cursor()
+            cursor.execute(insert_query)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' or otp != None:
             print("in voluenteer otp section")
-            res =  request.session['response_text']
-            res = ast.literal_eval(res)
-            session_id = res['Details']
+            query = "select session_id, id from session_id_table;"
+            df = getdata(query)
+            session_id = df['session_id'][0]
+            id = df['id'][0]
+            print('session_id', session_id)
+            print('id', id)
+
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" + otp
             response = requests.request("POST", recive_otp_url)
             request.session['response_text1'] = response.text
@@ -222,20 +248,16 @@ def volunteer_registration(request):
             print(status)
 
             if status == 'OTP Matched':
-                params = {
-                    'image': request.session['image_url'],
-                    'gender': request.session['gender'],
-                    'mobile': request.session['mobile'],
-                    'address': request.session['address']
-                }
-                print(params)
-                insert_query = "insert into volunteer_registration(image_url, gender, mobile, address)" \
-                               + " VALUES('{image}', '{gender}', '{mobile}', '{address}')".format(**params)
+                update_query = "UPDATE volunteer_registration " \
+                               "SET status = 'Matched' where id = '{id}'".format(**{'id': id})
 
-                print('insert_query', insert_query)
+                print(update_query)
                 cursor = connection.cursor()
-                cursor.execute(insert_query)
+                cursor.execute(update_query)
 
+                truncate_query = "truncate session_id_table;"
+                cursor = connection.cursor()
+                cursor.execute(truncate_query)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
 
