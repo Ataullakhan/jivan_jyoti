@@ -24,6 +24,8 @@ urlpatterns = [
     path('registration_form/', views.registration_form, name='registration_form'),
     path('admin_registration/', views.admin_registration, name='admin_registration'),
     path('volunteer_registration/', views.volunteer_registration, name='volunteer_registration'),
+    path('fatch_ragistration_data/', views.fatch_ragistration_data),
+    path('fatch_volunteer_data/', views.fatch_volunteer_data),
 
 ]
 

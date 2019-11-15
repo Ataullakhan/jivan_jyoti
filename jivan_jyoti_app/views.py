@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from datetime import date
+import datetime
 import pandas as pd
 import json
 import requests
@@ -82,7 +83,6 @@ def registration_form(request):
             return HttpResponse(json.dumps({"Message": 'mobile number is not correct', 'status': False}))
         params = {
             'submit_date': submit_date, 'modify_date': modified_date,
-            'family_unique_id': new_dict['family_unique_id'][0],
             'name': new_dict['name'][0], 'father_husband_name': new_dict['father_husband_name'][0],
             'mother_name': new_dict['mother_name'][0], 'gender': new_dict['gender'][0],
             'DOB': new_dict['DOB'][0], 'marital_status': new_dict['marital_status'][0],
@@ -97,12 +97,12 @@ def registration_form(request):
         }
         print('params', params)
         insert_query = "insert into ragistration_form(submit_date, modify_date, " \
-                       "family_unique_id, name, father_husband_name, mother_name, " \
+                       "name, father_husband_name, mother_name, " \
                        "gender, DOB, marital_status, education, education_status, " \
                        "occupation, occupation_description, mobile, flat_room_block_no," \
                        " premises_building_villa, road_street_lane, " \
                        "area_locality_taluk, pin_code, state, district)" \
-                       + " VALUES('{submit_date}', '{modify_date}', '{family_unique_id}', " \
+                       + " VALUES('{submit_date}', '{modify_date}', " \
                          "'{name}', '{father_husband_name}', '{mother_name}', '{gender}', " \
                          "'{DOB}', '{marital_status}', '{education}', '{education_status}', " \
                          "'{occupation}', '{occupation_description}', '{mobile}', " \
@@ -266,8 +266,46 @@ def volunteer_registration(request):
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
 
-
-
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
+
+@csrf_exempt
+def fatch_ragistration_data(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == 'POST':
+        get_data_query = "select * from ragistration_form"
+        df = getdata(get_data_query)
+        df['submit_date'] = df['submit_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+        df['modify_date'] = df['modify_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+
+        data = df.to_json(orient='records')
+        print('df', df)
+        print('data', data)
+
+        return HttpResponse(json.dumps({'data': data}))
+
+
+
+@csrf_exempt
+def fatch_volunteer_data(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == 'POST':
+        get_data_query = "select name, image_url, gender, mobile, address from volunteer_registration;"
+        df = getdata(get_data_query)
+
+        data = df.to_json(orient='records')
+        print('df', df)
+        print('data', data)
+
+        return HttpResponse(json.dumps({'data': data}))
+
+
 
