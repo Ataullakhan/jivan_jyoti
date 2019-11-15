@@ -183,7 +183,7 @@ def volunteer_registration(request):
     # try:
     if request.method == 'POST':
         otp = request.POST.get('otp')
-        print('otppp', otp)
+        print('otppp',otp)
         if otp == '' or otp == None:
             print("in volunteer user input section")
             image = request.FILES['image']
@@ -201,11 +201,12 @@ def volunteer_registration(request):
                 'mobile': request.POST.get('mobile'),
                 'address': request.POST.get('address'),
                 'status': 'Panding',
-                'id': uuid
+                'id': uuid,
+                'name': request.POST.get('name')
             }
             print(params)
-            insert_query = "insert into volunteer_registration(image_url, gender, mobile, address, status, id)" \
-                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}')".format(**params)
+            insert_query = "insert into volunteer_registration(image_url, gender, mobile, address, status, id, name)" \
+                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}', '{name}')".format(**params)
 
             print('insert_query', insert_query)
             cursor = connection.cursor()
@@ -238,7 +239,7 @@ def volunteer_registration(request):
             id = df['id'][0]
             print('session_id', session_id)
             print('id', id)
-
+            print('000000000', otp)
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" + otp
             response = requests.request("POST", recive_otp_url)
             request.session['response_text1'] = response.text
