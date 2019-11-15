@@ -113,8 +113,12 @@ def registration_form(request):
         cursor = connection.cursor()
         cursor.execute(insert_query)
         print("555555555")
+        url = "http://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/ADDON_SERVICES/SEND/TSMS"
 
-        return HttpResponse(json.dumps({'Message': 'Success', 'status': True, 'data': 'Saved into database'}))
+        payload = "{\"From\": \"JIVANJ\",\"To\": \""+mobile+"'\", \"Msg\": \"Hi "+new_dict['name'][0]+", Your JIVAN JYOTI registration successful.\"}"
+        response = requests.request("POST", url, data=payload)
+
+        return HttpResponse(json.dumps({'Message': 'Success', 'status': True, 'data': response.text}))
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
 
@@ -240,7 +244,7 @@ def volunteer_registration(request):
             print('session_id', session_id)
             print('id', id)
             print('000000000', otp)
-            recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" + otp
+            recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
             response = requests.request("POST", recive_otp_url)
             request.session['response_text1'] = response.text
             otp_val = request.session['response_text1']
