@@ -281,6 +281,7 @@ def fatch_ragistration_data(request):
         df = getdata(get_data_query)
         df['submit_date'] = df['submit_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
         df['modify_date'] = df['modify_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
+        df['dob'] = df['dob'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
         data = df.to_json(orient='records')
         print('df', df)
