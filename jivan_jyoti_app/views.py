@@ -265,6 +265,11 @@ def fatch_ragistration_data(request):
         df['modify_date'] = df['modify_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
         df['dob'] = df['dob'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
+        excel_path = path + "/excel_file/output.xlsx"
+        df.to_excel(excel_path, engine='xlsxwriter')
+
+        print(excel_path)
+
         data = df.to_dict('records')
         return HttpResponse(json.dumps({'data': data}))
 
@@ -281,6 +286,10 @@ def fatch_volunteer_data(request):
         get_data_query = "select name, image_url, gender, mobile, address from volunteer_registration;"
         df = getdata(get_data_query)
 
+        excel_path = path + "/excel_file/output.xlsx"
+        df.to_excel(excel_path, engine='xlsxwriter')
+
+        print(excel_path)
         data = df.to_dict('records')
         return HttpResponse(json.dumps({'data': data}))
 
