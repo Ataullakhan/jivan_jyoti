@@ -1,8 +1,6 @@
 from uuid import uuid1
-
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
-# from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.db import connection
 from datetime import date
@@ -62,24 +60,16 @@ def registration_form(request):
         submit_date = today.strftime("%Y/%m/%d")
         modified_date =today.strftime("%Y/%m/%d")
         data = request.POST
-        print('data', data)
         new_dict = dict(data)
-        print("new_dict", new_dict)
         pincode = new_dict['pin_code'][0]
-        print("pincode", pincode)
         mobile = new_dict['mobile'][0]
-        print('mobile', mobile)
         if validate_pin(pincode) is True:
-            print('22222222222')
             pincode = pincode
         else:
-            print('333333333')
             return HttpResponse(json.dumps({"Message": 'Pincode is not correct', 'status': False}))
         if mobile_valid(mobile):
-            print('4444444')
             mobile = mobile
         else:
-            print('555555555')
             return HttpResponse(json.dumps({"Message": 'mobile number is not correct', 'status': False}))
         params = {
             'submit_date': submit_date, 'modify_date': modified_date,
@@ -95,7 +85,6 @@ def registration_form(request):
             'area_locality_taluk': new_dict['area_locality_taluk'][0], 'pin_code': pincode,
             'state': new_dict['state'][0], 'district': new_dict['district'][0]
         }
-        print('params', params)
         insert_query = "insert into ragistration_form(submit_date, modify_date, " \
                        "name, father_husband_name, mother_name, " \
                        "gender, DOB, marital_status, education, education_status, " \
@@ -109,15 +98,11 @@ def registration_form(request):
                          "'{flat_room_block_no}', '{premises_building_villa}', '{road_street_lane}', " \
                          "'{area_locality_taluk}', '{pin_code}', '{state}', '{district}')".format(**params)
 
-        print('insert_query', insert_query)
         cursor = connection.cursor()
         cursor.execute(insert_query)
-        print("555555555")
         url = "http://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/ADDON_SERVICES/SEND/TSMS"
-
         payload = "{\"From\": \"JIVANJ\",\"To\": \""+mobile+"'\", \"Msg\": \"Hi "+new_dict['name'][0]+", Your JIVAN JYOTI registration successful.\"}"
         response = requests.request("POST", url, data=payload)
-
         return HttpResponse(json.dumps({'Message': 'Success', 'status': True, 'data': response.text}))
     # except Exception as e:
     #     return HttpResponse(json.dumps({'status': False, 'msg': str(e)}))
@@ -133,9 +118,7 @@ def admin_registration(request):
     # try:
     if request.method == 'POST':
         otp = request.POST.get('otp')
-        print(otp)
         mobile = request.POST.get('mobile')
-        print(mobile)
         valid_mobile = config.mobile
         if mobile == valid_mobile:
             print("in admin number section")
@@ -147,18 +130,13 @@ def admin_registration(request):
             params = {
                 'session_id': session_id
             }
-
             insert_query = "insert into session_id_table(session_id) VALUES('{session_id}')".format(**params)
             cursor = connection.cursor()
             cursor.execute(insert_query)
-            # request.session['response_text'] = response.text
-            # print(request.session['response_text'])
-
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' and otp != None:
             print("in admin otp section")
-
             query = "select session_id from session_id_table;"
             df = getdata(query)
             session_id = df['session_id'][0]
@@ -169,7 +147,6 @@ def admin_registration(request):
             cursor = connection.cursor()
             cursor.execute(truncate_query)
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
-
         else:
             return HttpResponse(json.dumps({'msg': 'incorrect mobile number', 'status': False}))
 
@@ -189,6 +166,10 @@ def volunteer_registration(request):
         otp = request.POST.get('otp')
         print('otppp',otp)
         if otp == '' or otp == None:
+            truncate_query = "truncate session_id_table;"
+            cursor = connection.cursor()
+            cursor.execute(truncate_query)
+
             print("in volunteer user input section")
             image = request.FILES['image']
             # if request.session['image'] != None:
@@ -263,6 +244,7 @@ def volunteer_registration(request):
                 truncate_query = "truncate session_id_table;"
                 cursor = connection.cursor()
                 cursor.execute(truncate_query)
+
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
 
@@ -284,9 +266,6 @@ def fatch_ragistration_data(request):
         df['dob'] = df['dob'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
         data = df.to_dict('records')
-        print('df', df)
-        print('data', data)
-
         return HttpResponse(json.dumps({'data': data}))
 
 
@@ -303,9 +282,6 @@ def fatch_volunteer_data(request):
         df = getdata(get_data_query)
 
         data = df.to_dict('records')
-        print('df', df)
-        print('data', data)
-
         return HttpResponse(json.dumps({'data': data}))
 
 
