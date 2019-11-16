@@ -283,7 +283,8 @@ def fatch_volunteer_data(request):
     :return:
     """
     if request.method == 'POST':
-        get_data_query = "select name, image_url, gender, mobile, address from volunteer_registration;"
+        get_data_query = "select name, image_url, gender, mobile, address " \
+                         "from volunteer_registration where status = 'Matched';"
         df = getdata(get_data_query)
 
         data = df.to_dict('records')
