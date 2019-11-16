@@ -175,8 +175,8 @@ def volunteer_registration(request):
             # if request.session['image'] != None:
             fs = FileSystemStorage()
             filename = fs.save(image.name, image)
-            image_url = path + '/' + filename
-            print('image_url', image_url)
+            print('image_url', filename)
+            image_url = 'http://35.224.167.35/media/' + filename
 
             uuid = uuid1()
             print('uuid', uuid)
