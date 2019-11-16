@@ -286,10 +286,6 @@ def fatch_volunteer_data(request):
         get_data_query = "select name, image_url, gender, mobile, address from volunteer_registration;"
         df = getdata(get_data_query)
 
-        excel_path = path + "/excel_file/output.xlsx"
-        df.to_excel(excel_path, engine='xlsxwriter')
-
-        print(excel_path)
         data = df.to_dict('records')
         return HttpResponse(json.dumps({'data': data}))
 

@@ -1,0 +1,6 @@
+*.pyc
+
+jivan_jyoti/*.pyc
+jivan_jyoti_app/*.pyc
+.idea/workspace.xml
+jivan_jyoti/__pycache__/*.pyc
