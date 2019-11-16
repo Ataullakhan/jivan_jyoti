@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f38e2443-457a-408c-a429-b92ec642afc7" name="Default Changelist" comment="" />
+    <list default="true" id="f38e2443-457a-408c-a429-b92ec642afc7" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/media/excel_file/.~lock.output.xlsx#" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/media/excel_file/output.xlsx" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,6 +17,9 @@
         <option value="Python Script" />
       </list>
     </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1SjRtKPfqxY9VZygo0TqA46WrEA" />
   <component name="PropertiesComponent">
