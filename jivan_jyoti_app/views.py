@@ -1,4 +1,6 @@
 from uuid import uuid1
+
+import psycopg2
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -122,7 +124,7 @@ def admin_registration(request):
         valid_mobile = config.mobile
         if mobile == valid_mobile:
             print("in admin number section")
-            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91"+valid_mobile+"/AUTOGEN"
+            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91"+valid_mobile+"/AUTOGEN/JivanJyotiadminotp"
             response = requests.request("POST", send_otp_url)
             print('------------', response.text)
             res = ast.literal_eval(response.text)
@@ -164,22 +166,16 @@ def volunteer_registration(request):
     # try:
     if request.method == 'POST':
         otp = request.POST.get('otp')
-        print('otppp',otp)
         if otp == '' or otp == None:
             truncate_query = "truncate session_id_table;"
             cursor = connection.cursor()
             cursor.execute(truncate_query)
-
-            print("in volunteer user input section")
             image = request.FILES['image']
             # if request.session['image'] != None:
             fs = FileSystemStorage()
             filename = fs.save(image.name, image)
-            print('image_url', filename)
             image_url = 'http://35.224.167.35/media/' + filename
-
             uuid = uuid1()
-            print('uuid', uuid)
             params = {
                 'image': image_url,
                 'gender': request.POST.get('gender'),
@@ -187,22 +183,31 @@ def volunteer_registration(request):
                 'address': request.POST.get('address'),
                 'status': 'Panding',
                 'id': uuid,
-                'name': request.POST.get('name')
+                'name': request.POST.get('name'),
+                'fathername': request.POST.get('fathername'),
+                'dateofbirth': request.POST.get('dateofbirth')
             }
             print(params)
-            insert_query = "insert into volunteer_registration(image_url, gender, mobile, address, status, id, name)" \
-                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}', '{name}')".format(**params)
+            insert_query = "insert into volunteer_registration" \
+                           "(image_url, gender, mobile, address, status, id, name, fathername, dateofbirth)" \
+                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}'," \
+                             " '{name}', '{fathername}', '{dateofbirth}')".format(**params)
 
             print('insert_query', insert_query)
             cursor = connection.cursor()
-            cursor.execute(insert_query)
+            try:
+                cursor.execute(insert_query)
+            except (Exception, psycopg2.Error) as error:
+                return HttpResponse(json.dumps({'status': False, 'data': str(error)}))
 
             admin_number = config.mobile
+
         # if mobile_valid(request.session['mobile']):
-            send_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91" + admin_number + "/AUTOGEN"
-            response = requests.request("POST", send_otp_url)
-            request.session['response_text'] = response.text
-            print('response texttt', response.text)
+            url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/+91" + admin_number + "/AUTOGEN/JivanJyotiadminotp"
+
+            payload = "{\"From\": \"JIVANJ\", \"To\": \""+admin_number+"'\", \"Msg\": \"Volunteer Mobile Number: "+request.POST.get('mobile')+", for JIVAN JYOTI registration.\"}"
+            headers = {'content-type': "application/x-www-form-urlencoded"}
+            response = requests.request("POST", url, data=payload, headers=headers)
 
             res = ast.literal_eval(response.text)
             session_id = res['Details']

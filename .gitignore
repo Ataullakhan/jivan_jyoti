@@ -6,3 +6,12 @@ jivan_jyoti_app/*.pyc
 jivan_jyoti/__pycache__/*.pyc
 media/
 
+jivan_jyoti/__pycache__/__init__.cpython-36.pyc
+jivan_jyoti/__pycache__/config.cpython-36.pyc
+jivan_jyoti/__pycache__/settings.cpython-36.pyc
+jivan_jyoti/__pycache__/urls.cpython-36.pyc
+jivan_jyoti/__pycache__/wsgi.cpython-36.pyc
+jivan_jyoti_app/__pycache__/__init__.cpython-36.pyc
+jivan_jyoti_app/__pycache__/utils.cpython-36.pyc
+jivan_jyoti_app/__pycache__/views.cpython-36.pyc
+
