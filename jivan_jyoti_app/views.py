@@ -288,9 +288,10 @@ def fatch_volunteer_data(request):
     :return:
     """
     if request.method == 'POST':
-        get_data_query = "select name, image_url, gender, mobile, address " \
+        get_data_query = "select name, image_url, gender, mobile, address, fathername, dateofbirth " \
                          "from volunteer_registration where status = 'Matched';"
         df = getdata(get_data_query)
+        df['dateofbirth'] = df['dateofbirth'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
         data = df.to_dict('records')
         return HttpResponse(json.dumps({'data': data}))
