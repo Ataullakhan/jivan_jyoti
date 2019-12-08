@@ -180,18 +180,29 @@ def volunteer_registration(request):
                 'image': image_url,
                 'gender': request.POST.get('gender'),
                 'mobile': request.POST.get('mobile'),
-                'address': request.POST.get('address'),
                 'status': 'Panding',
                 'id': uuid,
                 'name': request.POST.get('name'),
                 'fathername': request.POST.get('fathername'),
-                'dateofbirth': request.POST.get('dateofbirth')
+                'dateofbirth': request.POST.get('dateofbirth'),
+                'flat_room_block_no': request.POST.get('flat_room_block_no'),
+                'premises_building_villa': request.POST.get('premises_building_villa'),
+                'road_street_lane': request.POST.get('road_street_lane'),
+                'area_locality_taluk': request.POST.get('area_locality_taluk'),
+                'pin_code': request.POST.get('pin_code'),
+                'state': request.POST.get('state'),
+                'district': request.POST.get('district'),
             }
             print(params)
             insert_query = "insert into volunteer_registration" \
-                           "(image_url, gender, mobile, address, status, id, name, fathername, dateofbirth)" \
-                           + " VALUES('{image}', '{gender}', '{mobile}', '{address}', '{status}', '{id}'," \
-                             " '{name}', '{fathername}', '{dateofbirth}')".format(**params)
+                           "(image_url, gender, mobile, status, id, name, fathername, dateofbirth, " \
+                           "flat_room_block_no, premises_building_villa, road_street_lane, area_locality_taluk," \
+                           "pin_code, state, district)" \
+                           + " VALUES('{image}', '{gender}', '{mobile}', '{status}', '{id}'," \
+                             " '{name}', '{fathername}', '{dateofbirth}'," \
+                             " '{flat_room_block_no}', '{premises_building_villa}'," \
+                             " '{road_street_lane}', '{area_locality_taluk}', '{pin_code}', '{state}'," \
+                             " '{district}')".format(**params)
 
             print('insert_query', insert_query)
             cursor = connection.cursor()
@@ -222,27 +233,21 @@ def volunteer_registration(request):
             return HttpResponse(json.dumps({'msg': 'success', 'status': True, 'data': response.text}))
 
         elif otp != '' or otp != None:
-            print("in voluenteer otp section")
             query = "select session_id, id from session_id_table;"
             df = getdata(query)
             session_id = df['session_id'][0]
             id = df['id'][0]
-            print('session_id', session_id)
-            print('id', id)
-            print('000000000', otp)
             recive_otp_url = "https://2factor.in/API/V1/7fe951b0-fb11-11e9-9fa5-0200cd936042/SMS/VERIFY/" + session_id + "/" +otp
             response = requests.request("POST", recive_otp_url)
             request.session['response_text1'] = response.text
             otp_val = request.session['response_text1']
             res1 = ast.literal_eval(otp_val)
             status = res1['Details']
-            print(status)
 
             if status == 'OTP Matched':
                 update_query = "UPDATE volunteer_registration " \
                                "SET status = 'Matched' where id = '{id}'".format(**{'id': id})
 
-                print(update_query)
                 cursor = connection.cursor()
                 cursor.execute(update_query)
 
@@ -279,7 +284,6 @@ def fatch_ragistration_data(request):
         return HttpResponse(json.dumps({'data': data}))
 
 
-
 @csrf_exempt
 def fatch_volunteer_data(request):
     """
@@ -288,7 +292,9 @@ def fatch_volunteer_data(request):
     :return:
     """
     if request.method == 'POST':
-        get_data_query = "select name, image_url, gender, mobile, address, fathername, dateofbirth " \
+        get_data_query = "select name, image_url, gender, mobile, fathername, " \
+                         "dateofbirth, flat_room_block_no, premises_building_villa, road_street_lane," \
+                         "area_locality_taluk, pin_code, state, district" \
                          "from volunteer_registration where status = 'Matched';"
         df = getdata(get_data_query)
         df['dateofbirth'] = df['dateofbirth'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
