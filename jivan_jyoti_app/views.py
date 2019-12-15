@@ -330,7 +330,7 @@ def fatch_ragistration_data(request):
     :return:
     """
     if request.method == 'POST':
-        get_data_query = "select * from ragistration_form"
+        get_data_query = "select * from ragistration_form where status = 'Matched';"
         df = getdata(get_data_query)
         df['submit_date'] = df['submit_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
         df['modify_date'] = df['modify_date'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
@@ -353,10 +353,7 @@ def fatch_volunteer_data(request):
     :return:
     """
     if request.method == 'POST':
-        get_data_query = "select name, image_url, gender, mobile, fathername, " \
-                         "dateofbirth, flat_room_block_no, premises_building_villa, road_street_lane," \
-                         "area_locality_taluk, pin_code, state, district" \
-                         "from volunteer_registration where status = 'Matched';"
+        get_data_query = "select * from volunteer_registration where status = 'Matched';"
         df = getdata(get_data_query)
         df['dateofbirth'] = df['dateofbirth'].apply(lambda x: datetime.datetime.strftime(x, '%Y-%m-%d'))
 
